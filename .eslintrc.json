@@ -1,0 +1,19 @@
+{
+  "env": {
+    "node": true,
+    "browser": true
+  },
+  "extends": [
+    "airbnb",
+    "prettier"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-restricted-syntax": "off",
+    "no-await-in-loop": "off",
+    "no-console": "off"
+  }
+}
