@@ -2,18 +2,15 @@ const puppeteer = require('puppeteer')
 const { exec } = require('pkg')
 const path = require('path')
 
-async function downloadPuppeteer(path) {
-  const platforms = [
-    'win64',
-    'linux',
-  ]
+async function downloadPuppeteer(downloadPath) {
+  const platforms = ['win64', 'linux']
 
-  for (platform of platforms) {
+  for (const platform of platforms) {
     const downloadFetcher = puppeteer.createBrowserFetcher({
       platform,
-      path
+      downloadPath,
     })
-    
+
     try {
       await downloadFetcher.download(809590)
     } catch (err) {

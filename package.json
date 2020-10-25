@@ -13,7 +13,8 @@
   "dependencies": {
     "inquirer": "^7.3.3",
     "minimist": "^1.2.5",
-    "puppeteer": "^5.4.0"
+    "puppeteer": "^5.4.0",
+    "pkg": "^4.4.9"
   },
   "devDependencies": {
     "eslint": "^7.2.0",
@@ -24,7 +25,6 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.0.0",
-    "pkg": "^4.4.9",
     "prettier": "^2.1.2"
   }
 }

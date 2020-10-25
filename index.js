@@ -6,51 +6,72 @@ const path = require('path')
 
 const isPkg = typeof process.pkg !== 'undefined'
 
-let chromiumExecutablePath = (isPkg ?
-  puppeteer.executablePath().replace(
-    /^.*?\/node_modules\/puppeteer\/\.local-chromium/,
-    path.join(path.dirname(process.execPath), 'puppeteer', '.local-chromium')
-  ) :
-  puppeteer.executablePath()
-);
+let chromiumExecutablePath = isPkg
+  ? puppeteer
+      .executablePath()
+      .replace(
+        /^.*?\/node_modules\/puppeteer\/\.local-chromium/,
+        path.join(
+          path.dirname(process.execPath),
+          'puppeteer',
+          '.local-chromium'
+        )
+      )
+  : puppeteer.executablePath()
 
-if (process.platform == 'win32') {
-  chromiumExecutablePath = (isPkg ?
-    puppeteer.executablePath().replace(
-      /^.*?\\node_modules\\puppeteer\\\.local-chromium/,
-      path.join(path.dirname(process.execPath), 'puppeteer', '.local-chromium')
-    ) :
-    puppeteer.executablePath()
-  );
+if (process.platform === 'win32') {
+  chromiumExecutablePath = isPkg
+    ? puppeteer
+        .executablePath()
+        .replace(
+          /^.*?\\node_modules\\puppeteer\\\.local-chromium/,
+          path.join(
+            path.dirname(process.execPath),
+            'puppeteer',
+            '.local-chromium'
+          )
+        )
+    : puppeteer.executablePath()
 }
 
 function getConfig() {
   return new Promise((resolve, reject) => {
-    inquirer.prompt([
-      {
-        type: 'input',
-        name: 'url',
-        message: 'URL to scrape?'
-      }
-    ]).then((answers) => {
-      resolve(answers)
-    }).catch((err) => {
-      reject(err)
-    })
+    inquirer
+      .prompt([
+        {
+          type: 'input',
+          name: 'url',
+          message: 'URL to scrape?',
+        },
+      ])
+      .then((answers) => {
+        resolve(answers)
+      })
+      .catch((err) => {
+        reject(err)
+      })
   })
+}
+
+function printProgress(count) {
+  process.stdout.clearLine()
+  process.stdout.cursorTo(0)
+  process.stdout.write(`Captured ${count} phone numbers`)
 }
 
 async function doScrape(url) {
   const browser = await puppeteer.launch({
-    executablePath: chromiumExecutablePath
+    executablePath: chromiumExecutablePath,
   })
   const page = await browser.newPage()
   await page.goto(url, {
-    waitUntil: 'load'
+    waitUntil: 'load',
   })
 
   const links = await page.evaluate(() => {
-    const linkSelectors = document.querySelectorAll('.listHandler .offers a.thumb.linkWithHash')
+    const linkSelectors = document.querySelectorAll(
+      '.listHandler .offers a.thumb.linkWithHash'
+    )
     const output = []
     linkSelectors.forEach((elm) => {
       output.push(elm.getAttribute('href'))
@@ -60,9 +81,9 @@ async function doScrape(url) {
 
   const numbers = []
 
-  for (link of links) {
+  for (const link of links) {
     await page.goto(link, {
-      waitUntil: 'load'
+      waitUntil: 'load',
     })
 
     let phoneNumber = null
@@ -78,9 +99,11 @@ async function doScrape(url) {
               const monitor = document.querySelector('.link-phone .button')
               if (monitor.style.display === 'none') {
                 clearInterval(waitForHide)
-                resolve(document.querySelector('.link-phone .contactitem').textContent.trim())
-              } else {
-                console.log(monitor)
+                resolve(
+                  document
+                    .querySelector('.link-phone .contactitem')
+                    .textContent.trim()
+                )
               }
             }, 500)
           })
@@ -89,40 +112,44 @@ async function doScrape(url) {
         }
       })
     } else if (pageURL.startsWith('https://www.storia.ro')) {
+      // eslint-disable-next-line no-loop-func
       phoneNumber = await page.evaluate(async () => {
         try {
           const buttons = document.querySelectorAll('button')
 
-          for (button of buttons) {
+          for (const button of buttons) {
             if (button.textContent.trim() === 'Afiseaza numarul') {
               button.click()
 
+              // eslint-disable-next-line no-loop-func
               return await new Promise((resolve) => {
-                const workarea = document.querySelector('div[class^=styles_overlay]')
+                const workarea = document.querySelector(
+                  'div[class^=styles_overlay]'
+                )
                 const waitForWorkarea = setInterval(() => {
                   if (workarea) {
                     clearInterval(waitForWorkarea)
                     const number = workarea.querySelector('ul li ul li')
                     resolve(number.textContent.trim())
-                  } else {
-                    console.log(monitor)
                   }
                 }, 500)
               })
             }
           }
+
+          return null
         } catch (err) {
           return null
         }
       })
     }
-    
+
     if (phoneNumber) {
       numbers.push(phoneNumber)
       printProgress(numbers.length)
     }
   }
-  
+
   await browser.close()
 
   return numbers
@@ -130,7 +157,7 @@ async function doScrape(url) {
 
 function saveFile(destination, data) {
   const stream = fs.createWriteStream(destination, {
-    flags: 'a'
+    flags: 'a',
   })
 
   stream.write('Phone number\n')
@@ -141,12 +168,6 @@ function saveFile(destination, data) {
 
   console.log(`Data saved to ${destination}`)
   return destination
-}
-
-function printProgress(count){
-  process.stdout.clearLine();
-  process.stdout.cursorTo(0);
-  process.stdout.write(`Captured ${count} phone numbers`);
 }
 
 async function main() {
@@ -162,7 +183,7 @@ async function main() {
   }
 
   let output = await doScrape(config.url)
-  
+
   if (config.removeDuplicates) {
     output = output.filter((entry, index) => {
       return output.indexOf(entry) !== index
