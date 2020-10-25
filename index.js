@@ -43,6 +43,12 @@ function getConfig() {
           name: 'url',
           message: 'URL to scrape?',
         },
+        {
+          type: 'confirm',
+          name: 'removeDuplicates',
+          message: 'Remove duplicate entries?',
+          default: false,
+        },
       ])
       .then((answers) => {
         resolve(answers)
@@ -180,6 +186,10 @@ async function main() {
     const inputConfig = await getConfig()
     config.url = inputConfig.url
     config.removeDuplicates = inputConfig.removeDuplicates
+  }
+
+  if (!config.url) {
+    return 0
   }
 
   let output = await doScrape(config.url)
