@@ -1,0 +1,17 @@
+# Freelancer Project 27889646
+
+want a program to scan phone numbers from the site or to repair website www.olx.ro
+
+## Setup
+
+Run `npm install`
+
+## Testing
+
+Run `npm run start`
+
+## Building
+
+Run `npm run build`
+
+`./dist` will contain compiled executables and any necessary packages that need to be distributed

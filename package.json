@@ -1,0 +1,21 @@
+{
+  "name": "freelancer-27889646",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": "index.js",
+  "author": "Mike Orozco <me@mikeorozco.dev>",
+  "scripts": {
+    "start": "node index.js",
+    "build": "node build.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "inquirer": "^7.3.3",
+    "minimist": "^1.2.5",
+    "puppeteer": "^5.4.0"
+  },
+  "devDependencies": {
+    "pkg": "^4.4.9"
+  }
+}
