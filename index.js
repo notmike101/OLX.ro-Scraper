@@ -1,38 +1,8 @@
 const inquirer = require('inquirer')
 const argv = require('minimist')(process.argv.slice(2))
 const fs = require('fs')
-const puppeteer = require('puppeteer')
 const path = require('path')
-
-const isPkg = typeof process.pkg !== 'undefined'
-
-let chromiumExecutablePath = isPkg
-  ? puppeteer
-      .executablePath()
-      .replace(
-        /^.*?\/node_modules\/puppeteer\/\.local-chromium/,
-        path.join(
-          path.dirname(process.execPath),
-          'puppeteer',
-          '.local-chromium'
-        )
-      )
-  : puppeteer.executablePath()
-
-if (process.platform === 'win32') {
-  chromiumExecutablePath = isPkg
-    ? puppeteer
-        .executablePath()
-        .replace(
-          /^.*?\\node_modules\\puppeteer\\\.local-chromium/,
-          path.join(
-            path.dirname(process.execPath),
-            'puppeteer',
-            '.local-chromium'
-          )
-        )
-    : puppeteer.executablePath()
-}
+const puppeteer = require('puppeteer')
 
 function getConfig() {
   return new Promise((resolve, reject) => {
@@ -67,8 +37,16 @@ function printProgress(count) {
 
 async function doScrape(url) {
   const browser = await puppeteer.launch({
-    executablePath: chromiumExecutablePath,
+    executablePath:
+      process.env.PUPPETEER_EXECUTABLE_PATH || process.pkg
+        ? path.join(
+            path.dirname(process.execPath),
+            'puppeteer',
+            ...puppeteer.executablePath().split(path.sep).slice(6)
+          )
+        : puppeteer.executablePath(),
   })
+
   const page = await browser.newPage()
   await page.goto(url, {
     waitUntil: 'load',
